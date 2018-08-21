@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^1.5.1",
     "antd": "^3.8.2",
+    "eosjs": "^16.0.5",
     "history": "^4.7.2",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",

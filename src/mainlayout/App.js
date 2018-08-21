@@ -1,9 +1,11 @@
 import React ,{ Component } from 'react';
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { Layout, Menu, Breadcrumb, Button, Alert } from 'antd';
 
 import Home from '../components/Home';
 import Article from '../components/Article';
 import Wallet from '../components/Wallet';
+
+import { auth, getBanlance, send } from '../request/request.js';
 
 import {
   BrowserRouter as Router,
@@ -17,11 +19,59 @@ import {
 
 const { Header, Content, Footer } = Layout;
 class App extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      scatterState: 0, // 0 is not start to check and 1 is start to check and 2 is check success
+      isLogin: false,
+      balance: 0,
+    };
+    this.handleGetBanlance = this.handleGetBanlance.bind(this);
+    this.handleAuth = this.handleAuth.bind(this);
+    this.sendMoney = this.sendMoney.bind(this);
+  }
+  componentWillMount(){
+    this.setState({
+      scatterState: 1,
+    })
+    document.addEventListener('scatterLoaded', scatterExtension => {
+      const scatter = window.scatter;
+      this.setState({
+        scatterState: 2,
+      })
+    })
+  }
+  handleAuth(){
+    auth().then(identity => {
+      // This would give back an object with the required fields such as `firstname` and `lastname`
+      // as well as add a permission for your domain or origin to the user's Scatter to allow deeper
+      // requests such as requesting blockchain signatures, or authentication of identities.
+      console.log(identity);
+    }).catch(error => {
+        //...
+        console.log("获取身份失败");
+    });
+  }
+  handleGetBanlance(){
+    const that = this;
+    console.log(this);
+    getBanlance().then(result => {
+      console.log(result);
+      that.setState({
+        balance: result.rows[0].balance
+      });
+    });
+  }
+  sendMoney(){
+    send('moon11112222','1.0000 MZ');
+  }
   render(){
+    const { scatterState } = this.state;
+    console.log(scatterState);
     return (
       <Router>
         <Layout>
-          <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
+          <Header style={{ position: 'fixed', zIndex: 1, width: '100%'  }}>
             <div className="logo" />
             <Menu
               theme="dark"
@@ -35,13 +85,26 @@ class App extends Component {
               <Menu.Item key="4"><Link to='wallet'>钱包</Link></Menu.Item>
             </Menu>
           </Header>
+
           <Content style={{ padding: '0 50px', marginTop: 64 }}>
             {/* <Breadcrumb style={{ margin: '16px 0' }}>
               <Breadcrumb.Item>Home</Breadcrumb.Item>
               <Breadcrumb.Item>List</Breadcrumb.Item>
               <Breadcrumb.Item>App</Breadcrumb.Item>
             </Breadcrumb> */}
+            {scatterState !== 2?
+            <Alert message="警告"
+              description="未发现scatter插件，请安装."
+              type="error"
+              closable
+              style={{ margin: '8px 0' }}
+              showIcon />
+              :null}
             <div style={{ background: '#fff', padding: 24, minHeight: 380 }}>
+            
+            <Button onClick = {this.handleAuth}>Auth</Button>
+            <Button onClick = {this.handleGetBanlance}>getBanlance</Button>
+            <Button onClick = {this.sendMoney}>sendMoney</Button>
               <Route exact path="/home" component={Home} />
               <Route path="/article" component={Article} />
               <Route path="/wallet" component={Wallet} />
