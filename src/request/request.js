@@ -55,7 +55,7 @@ export function send(name, number){
   const account=scatter.identity.accounts[0];
   const eosOptions={
     logger: { // Default logging functions
-      log: console.log ,
+      //log: console.log ,
       error:  console.error 
     },
     fetchConfiguration: {}
@@ -68,9 +68,13 @@ export function send(name, number){
           actor:account.name,
           permission:account.authority
         }],
-        broadcast:true,
+        //broadcast:true,
         sign:true
+      }).then(trx=>{
+        console.log(trx);
+      }).catch(e => {
+          console.log("error", e);
       });
-  });
+  }).catch(e => {console.log("error", e);});
 }
 // const scatter = window.scatter;
