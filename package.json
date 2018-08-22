@@ -4,11 +4,16 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^1.5.1",
+    "ajv": "^6.5.3",
     "antd": "^3.8.2",
+    "draftjs-to-html": "^0.8.4",
     "eosjs": "^16.0.5",
     "history": "^4.7.2",
+    "html-to-draftjs": "^1.4.0",
+    "ipfs-api": "^24.0.1",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
+    "react-draft-wysiwyg": "^1.12.13",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "react-scripts": "1.1.4"
