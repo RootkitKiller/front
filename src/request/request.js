@@ -77,4 +77,34 @@ export function send(name, number){
       });
   }).catch(e => {console.log("error", e);});
 }
+//参数:合约地址名、合约接口函数、接口函数参数
+export function signfun(contractname,contractfun,...arg){
+
+  const scatter = window.scatter;
+  const account=scatter.identity.accounts[0];
+  const eosOptions={
+    logger: { // Default logging functions
+      //log: console.log ,
+      error:  console.error 
+    },
+    fetchConfiguration: {}
+  };
+  const eos = scatter.eos( network, Eos, eosOptions);
+
+  return eos.contract(contractname).then(contract => {
+      eval('contract.'+contractfun)(...arg,{
+        authorization:[{
+          actor:account.name,
+          permission:account.authority
+        }],
+        //broadcast:true,
+        sign:true
+      }).then(trx=>{
+        console.log(trx);
+      }).catch(e => {
+          console.log("error", e);
+      });
+  }).catch(e => {console.log("error", e);});
+}
+
 // const scatter = window.scatter;

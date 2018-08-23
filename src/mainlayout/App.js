@@ -1,5 +1,5 @@
 import React ,{ Component } from 'react';
-import { Layout, Menu, Breadcrumb, Button, Alert } from 'antd';
+import { Layout, Menu, Breadcrumb, Button, Alert,Dropdown, Icon} from 'antd';
 
 import Home from '../components/Home';
 import Article from '../components/Article';
@@ -7,7 +7,7 @@ import Wallet from '../components/Wallet';
 import Ipfstest from '../components/Ipfstest';
 import ControlledEditor from '../components/Editer';
 
-import { auth, getBanlance, send } from '../request/request.js';
+import { auth, getBanlance, send, signfun } from '../request/request.js';
 
 import {
   BrowserRouter as Router,
@@ -17,15 +17,33 @@ import {
   withRouter
 } from "react-router-dom";
 
+/* 导航条右上角Dropdown 个人信息
+const menu = (
+  <Menu>
+    <Menu.Item>
+      <Link to='article'>我的文章</Link>
+    </Menu.Item>
+    <Menu.Item>
+      <Link to='article'>我的文章</Link>
+    </Menu.Item>
+    <Menu.Item>
+      <Link to='article'>我的文章</Link>
+    </Menu.Item>
+  </Menu>
+);*/
+
 // const history = createHistory()
 
 const { Header, Content, Footer } = Layout;
 class App extends Component {
+
   constructor(props){
     super(props);
     this.state = {
       scatterState: 0, // 0 is not start to check and 1 is start to check and 2 is check success
       isLogin: false,
+      identity:null,
+      name:null,
       balance: 0,
     };
     this.handleGetBanlance = this.handleGetBanlance.bind(this);
@@ -49,6 +67,8 @@ class App extends Component {
       // as well as add a permission for your domain or origin to the user's Scatter to allow deeper
       // requests such as requesting blockchain signatures, or authentication of identities.
       console.log(identity);
+      this.setState({ isLogin:true, identity: identity,name:identity.accounts[0].name });
+
     }).catch(error => {
         //...
         console.log("获取身份失败");
@@ -65,7 +85,8 @@ class App extends Component {
     });
   }
   sendMoney(){
-    send('moon11112222','1.0000 MZ');
+    //send('moon11112222','1.0000 MZ');
+    signfun('wafyarttoken','transfer',this.state.name,'moon11112222','1.0000 MZ',"test test test");
   }
   render(){
     const { scatterState } = this.state;
@@ -86,7 +107,7 @@ class App extends Component {
               <Menu.Item key="3"><Link to='sr'>订阅</Link></Menu.Item>
               <Menu.Item key="4"><Link to='wallet'>钱包</Link></Menu.Item>
               <Menu.Item key="5"><Link to='ipfstest'>ipfsapi测试</Link></Menu.Item>
-              <Menu.Item key="6"><Link to='editer'>发布</Link></Menu.Item>
+              <Menu.Item key="6"><Link to={{path:'/editer',state:{name:'sunny'}}}>发布</Link></Menu.Item>
             </Menu>
           </Header>
 
@@ -105,10 +126,10 @@ class App extends Component {
               showIcon />
               :null}
             <div style={{ background: '#fff', padding: 24, minHeight: 380 }}>
-            {/*
+            
             <Button onClick = {this.handleAuth}>Auth</Button>
             <Button onClick = {this.handleGetBanlance}>getBanlance</Button>
-            <Button onClick = {this.sendMoney}>sendMoney</Button>*/}
+            <Button onClick = {this.sendMoney}>sendMoney</Button>
 
               <Route exact path="/home" component={Home} />
               <Route path="/article" component={Article} />
