@@ -76,9 +76,8 @@ export function send(name, number){
           console.log("error", e);
       });
   }).catch(e => {console.log("error", e);});
-}
-//参数:合约地址名、合约接口函数、接口函数参数
-export function signfun(contractname,contractfun,...arg){
+}//参数:合约地址名、合约接口函数、接口函数参数
+export function signfun(contractname,contractfun,byname,...arg){
 
   const scatter = window.scatter;
   const account=scatter.identity.accounts[0];
@@ -90,9 +89,12 @@ export function signfun(contractname,contractfun,...arg){
     fetchConfiguration: {}
   };
   const eos = scatter.eos( network, Eos, eosOptions);
-
+  let name='';
+  if(byname==='self'){
+    name=scatter.identity.accounts[0].name;
+  }
   return eos.contract(contractname).then(contract => {
-      eval('contract.'+contractfun)(...arg,{
+      eval('contract.'+contractfun)(name,...arg,{
         authorization:[{
           actor:account.name,
           permission:account.authority
