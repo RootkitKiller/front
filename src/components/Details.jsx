@@ -18,8 +18,7 @@ class Details extends Component {
 
     return (
       <div>
-        {' '}
-        <img src={details} />
+{arthash} 
       </div>
     );
   }

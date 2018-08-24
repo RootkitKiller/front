@@ -4,6 +4,7 @@ import { Layout, Menu, Breadcrumb, Button, Alert,Dropdown, Icon} from 'antd';
 import Home from '../components/Home';
 import Article from '../components/Article';
 import Details from '../components/Details';
+import Sr from '../components/Sr';
 import Wallet from '../components/Wallet';
 import Ipfstest from '../components/Ipfstest';
 import ControlledEditor from '../components/Editer';
@@ -136,6 +137,7 @@ class App extends Component {
               <Route exact path="/article" component={Article} />
               <Route path="/article/:arthash" component={Details} />
               <Route path="/wallet" component={Wallet} />
+              <Route path="/sr" component={Sr} />
               <Route path="/ipfstest" component={Ipfstest} />
               <Route path="/editer" component={ControlledEditor} />
             </div>
