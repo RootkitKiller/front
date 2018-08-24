@@ -3,6 +3,7 @@ import { Layout, Menu, Breadcrumb, Button, Alert,Dropdown, Icon} from 'antd';
 
 import Home from '../components/Home';
 import Article from '../components/Article';
+import Details from '../components/Details';
 import Wallet from '../components/Wallet';
 import Ipfstest from '../components/Ipfstest';
 import ControlledEditor from '../components/Editer';
@@ -102,11 +103,11 @@ class App extends Component {
               defaultSelectedKeys={['1']}
               style={{ lineHeight: '64px' }}
             >
-              <Menu.Item key="1"><Link to='home'>主页</Link></Menu.Item>
-              <Menu.Item key="2"><Link to='article'>文章</Link></Menu.Item>
-              <Menu.Item key="3"><Link to='sr'>订阅</Link></Menu.Item>
-              <Menu.Item key="4"><Link to='wallet'>钱包</Link></Menu.Item>
-              <Menu.Item key="5"><Link to='ipfstest'>ipfsapi测试</Link></Menu.Item>
+              <Menu.Item key="1"><Link to='/home'>主页</Link></Menu.Item>
+              <Menu.Item key="2"><Link to='/article'>文章</Link></Menu.Item>
+              <Menu.Item key="3"><Link to='/sr'>订阅</Link></Menu.Item>
+              <Menu.Item key="4"><Link to='/wallet'>钱包</Link></Menu.Item>
+              <Menu.Item key="5"><Link to='/ipfstest'>ipfsapi测试</Link></Menu.Item>
               <Menu.Item key="6"><Link to={{path:'/editer',state:{name:'sunny'}}}>发布</Link></Menu.Item>
             </Menu>
           </Header>
@@ -132,7 +133,8 @@ class App extends Component {
             <Button onClick = {this.sendMoney}>sendMoney</Button>
 
               <Route exact path="/home" component={Home} />
-              <Route path="/article" component={Article} />
+              <Route exact path="/article" component={Article} />
+              <Route path="/article/:arthash" component={Details} />
               <Route path="/wallet" component={Wallet} />
               <Route path="/ipfstest" component={Ipfstest} />
               <Route path="/editer" component={ControlledEditor} />

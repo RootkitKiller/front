@@ -108,3 +108,6 @@ export function signfun(contractname,contractfun,...arg){
 }
 
 // const scatter = window.scatter;
+export function getRows(json , code , scope , table){
+    return eosApi.getTableRows(json , code , scope , table);
+}
