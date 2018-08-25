@@ -113,3 +113,43 @@ export function signfun(contractname,contractfun,byname,...arg){
 export function getRows(json , code , scope , table){
     return eosApi.getTableRows(json , code , scope , table);
 }
+export function getTableRows(object){
+
+    return new Promise(function (resolve, reject) {
+        var data = JSON.stringify(object);
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("POST", "https://api-kylin.eosasia.one:443/v1/chain/get_table_rows");
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                resolve(JSON.parse(xhr.responseText));
+            } else {
+                reject(new Error(xhr.statusText));
+            }
+        };
+        xhr.onerror = function () {
+            reject(new Error(xhr.statusText));
+        };
+        xhr.send(data);
+    });
+}
+export function getAction(object){
+  
+    return new Promise(function (resolve, reject) {
+        var data = JSON.stringify(object);
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("POST", "https://api-kylin.eosasia.one:443/v1/history/get_actions");
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                resolve(JSON.parse(xhr.responseText));
+            } else {
+                reject(new Error(xhr.statusText));
+            }
+        };
+        xhr.onerror = function () {
+            reject(new Error(xhr.statusText));
+        };
+        xhr.send(data);
+    });
+}

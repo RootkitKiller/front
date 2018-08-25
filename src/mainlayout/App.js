@@ -135,7 +135,7 @@ class App extends Component {
           </Row>
           </Header>
 
-          <Content style={{ padding: '0 50px', marginTop: 64 }}>
+          <Content style={{ padding: '0 50px',height: '100%', marginTop: 64 }}>
             {/* <Breadcrumb style={{ margin: '16px 0' }}>
               <Breadcrumb.Item>Home</Breadcrumb.Item>
               <Breadcrumb.Item>List</Breadcrumb.Item>
