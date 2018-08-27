@@ -23,7 +23,8 @@ class Wallet extends Component {
     		mzstakeable: false,
     		mzstakenum:'抵押数目，精确到四位小数，示例：1.0001', 
     		mzunstaable: false,
-    		mzunstanum:'解锁数目，精确到四位小数，示例：1.0001'
+    		mzunstanum:'解锁数目，精确到四位小数，示例：1.0001',
+    		unstakelist:[]
     	}
     	this.handleMzToChange=this.handleMzToChange.bind(this);
     	this.handleMzNumChange=this.handleMzNumChange.bind(this);
@@ -36,6 +37,25 @@ class Wallet extends Component {
 	   		this.handleGetInfo();
 	    });	
   	}
+  	convertUTCTimeToLocalTime(utc_datetime) {
+	    var T_pos = utc_datetime.indexOf('T');
+	    var Z_pos = utc_datetime.indexOf('Z');
+	    var year_month_day = utc_datetime.substr(0,T_pos);
+	    var hour_minute_second = utc_datetime.substr(T_pos+1,Z_pos-T_pos-1);
+	    var new_datetime = year_month_day+" "+hour_minute_second; // 2017-03-31 08:02:06
+
+	    // 处理成为时间戳
+	    timestamp = new Date(Date.parse(new_datetime));
+	    timestamp = timestamp.getTime();
+	    timestamp = timestamp/1000;
+
+	    // 增加8个小时，北京时间比utc时间多八个时区
+	    var timestamp = timestamp+8*60*60;
+
+	    // 时间戳转为时间
+	    var beijing_datetime = new Date(parseInt(timestamp) * 1000).toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
+	    return beijing_datetime; // 2017-03-31 16:02:06
+    }
   	handleGetInfo(){
   		try{
 	    	const scatter = window.scatter;
@@ -43,6 +63,7 @@ class Wallet extends Component {
 	      		this.setState({name:scatter.identity.accounts[0].name});
 	      		this.handleGetBanlance();
 	      		this.handleGetAction();
+	      		this.handleGetUnstake();
 	      	}	
 	  	}catch(e){
 	  		console.log(e);
@@ -56,6 +77,19 @@ class Wallet extends Component {
 	    }).catch(error => {
 	        //...
 	        console.log("获取身份失败");
+	    });
+  	}
+  	handleGetUnstake(){
+  		getTableRows({json:true,code:'wafyartvotes',scope:this.state.name,table:'accunstakes'}).then(result => {
+	      //console.log(result);
+	      try{
+	      	//console.log(result);
+		    this.setState({
+		      unstakelist: result.rows
+		     });
+		  }catch(e){
+		  	console.log(e);
+		  }
 	    });
   	}
   	handleGetBanlance(){
@@ -108,7 +142,7 @@ class Wallet extends Component {
 		    this.setState({
 		      actiondata:res
 		     });
-		     console.log(res);
+		     //console.log(res);
 		  }catch(e){
 		  	console.log(e);
 		  }
@@ -176,7 +210,7 @@ class Wallet extends Component {
 	}
 	handleunstaOk = (e) => {
 	    console.log(e);
-	    signfun('wafyartvotes','unstaketit','self',this.state.mzunstanum*10000.0000);
+	    signfun('wafyartvotes','unstaketit','self',parseInt(this.state.mzunstanum*10000.0000));
 	    this.setState({
 	      mzunstaable: false,
 	    });
@@ -191,7 +225,25 @@ class Wallet extends Component {
   	handleMzUnstaNumChange(event){
     	this.setState({mzunstanum:event.target.value});
   	}
-
+  	timeToDate(timestamp){
+  		return new Date(parseInt(timestamp) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ');  
+  	}
+  	clickUnstake(ev,id){
+  		//撤销解锁
+  		signfun('wafyartvotes','delunstake','self',id);
+	  	//console.log(id);
+  		var temp=[];
+  		for(var i=0;i<this.state.unstakelist.length;i++){
+  			temp[i]=this.state.unstakelist[i];
+   			if(id===(this.state.unstakelist[i].id).toString()){
+  				temp[i].isend=1;  			
+  			}
+  		}
+  		//for(var i=0;i<temp.length;i++){
+  		//	console.log(temp[i].unstakeid);
+  		//}
+  		this.setState({unstakelist:temp});
+  	}
    	render() {
   		const data = [
 		  {
@@ -271,14 +323,27 @@ class Wallet extends Component {
 				      	</List.Item>)}
 				    />
 				    <br />
-				    <h3 style={{ marginBottom: 16 }}>我的记录</h3>
+				    <h3 style={{ marginBottom: 16 }}>解锁记录（解锁期为三天）</h3>
+				    <List
+				    	bordered
+				    	dataSource={this.state.unstakelist}
+				    	renderItem={item=>(
+				    		<List.Item actions={[<Button type="primary" disabled={item.isend===1?'true':''} onClick={(ev)=>{this.clickUnstake(ev,item.id)}}>撤销解锁</Button>]}>
+				    			<List.Item.Meta 
+				      			description={<div>
+				      				<p>{'时间：'+this.timeToDate(item.timestamp)}&nbsp;&nbsp;&nbsp;{'数量：'+item.amount/10000.0000+' MZP'}&nbsp;&nbsp;&nbsp;{'状态：'+((item.isend===1)?'已完成':'解锁中')}</p></div>}/>
+				    		</List.Item>
+				    		)}
+				    />
+				    <br />
+				    <h3 style={{ marginBottom: 16 }}>操作记录</h3>
 				    <List
 				      bordered
 				      dataSource={this.state.actiondata}
 				      renderItem={item =>(
 				      	<List.Item>
 				      		<List.Item.Meta 
-				      			title={<p>{'合约：'+item.action_trace.act.account}&nbsp;&nbsp;{'接口：'+item.action_trace.act.name}&nbsp;&nbsp;{'时间：'+item.block_time}</p>}
+				      			title={<p>{'合约：'+item.action_trace.act.account}&nbsp;&nbsp;{'接口：'+item.action_trace.act.name}&nbsp;&nbsp;{'时间：'+this.convertUTCTimeToLocalTime(item.block_time+'Z')}</p>}
 				      			description={<div>
 				      				<p>{'交易id：'+item.action_trace.trx_id}</p></div>}/>
 				      	</List.Item>)}
