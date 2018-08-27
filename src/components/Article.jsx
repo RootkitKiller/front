@@ -1,11 +1,14 @@
 import React ,  {Component} from 'react';
 
+import {Link} from "react-router-dom";
+
+import ReactDOM from 'react-dom';
 
 import { Collapse } from 'antd';
 
 import { List, Avatar, Button, Spin, Icon } from 'antd';
 
-import { getRows } from '../request/request.js';
+import { getTableRows } from '../request/request.js';
 
 //const fakeDataUrl = 'https://randomuser.me/api/?results=5&inc=name,gender,email,nat&noinfo';
 
@@ -22,78 +25,138 @@ const customPanelStyle = {
 var listCates = [];
 var listArticles = [];
 var i = 0;
-
-getRows(true, 'wafyartvotes', 'wafyartvotes', 'cates')
-  .then(data => {
-    listCates = data.rows;
-    console.log(listCates);
-    for (let i = 0; i < listCates.length; i++) {
-      getRows(true, 'wafyartvotes', listCates[i].catename, 'articles')
-        .then(data => {
-          listArticles[i] = data.rows;
-          console.log(listArticles);
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    }
-  })
-  .catch(err => {
-    console.log(err);
-  });
+const antIcon = <Icon type="loading" style={{ 
+    fontSize: 50 ,
+    textAlign : 'center' ,    
+    width: '300px',
+    height: '350px',
+    margin: 'auto',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0}} spin />;
 
 const IconText = ({ type, text }) => (
   <span>
-    <Icon type={type} style={{ marginRight: 8 }} />
+    <Icon type={type} style={{ marginRight: 8 , height: '20px'}} ></Icon>
     {text}
   </span>
 );
 
-class Article extends React.Component {
+class Show extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      bool: false
+    }
+  }
+
+  handleClick = (event) =>{
+
+  }
+  handleOver = (event) =>{
+    this.setState({
+      bool: true
+    })
+  }
+  handleOut = (event) =>{
+    this.setState({
+      bool: false
+    })
+  }
+  render(){
+    let showstyle = {marginRight: 8 , height: '20px' , width: '20px'}
+    if (this.state.bool) {
+      showstyle = {
+        fontSize: 20,
+        color: '#f50',
+        marginRight: 8, 
+        height: '20px' , 
+        width: '20px'
+      }
+    }
+    return(    
+        <i className="anticon anticon-like" style={showstyle} 
+          onClick={this.handleClick.bind(this)} onMouseOver={this.handleOver.bind(this)} onMouseOut={this.handleOut.bind(this)} >
+        </i>
+    );
+  }
+}
+
+class Article extends React.Component { 
+    constructor(props) {
+    super(props)
+    this.state = {
+      loading: true
+    }
+  }
+  componentDidMount() {
+    // 数据异步请求，请求成功之后setState
+    getTableRows({json:true,code:'wafyartvotes',scope:'wafyartvotes',table:'cates'}).then(data => {
+  	      try{
+                listCates = data.rows;
+                for (let i = 0; i < listCates.length; i++) {
+                  getTableRows({json:true, code:'wafyartvotes', scope:listCates[i].catename ,table:'articles'}).then(data => {
+  	                try{
+                      listArticles[i] = data.rows;
+                      this.setState({
+                        loading: false
+                      })
+		                }catch(e){
+		  	              console.log(e);
+		                }});
+                }
+		          }catch(e){
+		  	        console.log(e);
+		          }});
+
+  }
   render() {
     i = 0;
     return (
-      <Collapse bordered={false} defaultActiveKey={['1']} accordion>
+      <div>{
+          this.state.loading
+          ? <Spin indicator={antIcon} />
+      :<div><Collapse bordered={false} defaultActiveKey={['1']} accordion>
         {listCates.map(iter => {
           i = i + 1;
           return (
             <Panel header={iter.catename} key={i} style={customPanelStyle}>
               <List
                 itemLayout="vertical"
+                //loading = 'true'
                 size="large"
                 pagination={{
                   onChange: page => {
                     console.log(page);
                   },
-                  pageSize: 3
+                  pageSize: 5
                 }}
                 dataSource={listArticles[i - 1]}
                 renderItem={item => (
                   <List.Item
-                    key={item.title}
+                    key={item.id}
                     actions={[
-                      <IconText type="like" text={item.addtick} />,
+                      <span><Show id={String("zan" + item.id)}   />{item.votenum} </span>,
                       <IconText type="pay-circle" text={item.basetick} />,
                       <IconText type="user" text={item.author} />,
-                      <IconText
-                        type="usr"
-                        text={new Date(
-                          item.timestamp * 1000
-                        ).toLocaleDateString()}
-                      />
+                      <IconText type="usr"  text={new Date(item.timestamp * 1000).toLocaleDateString()}/>
                     ]}
-                    //extra={<img width={272} alt="logo" src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png" />}
+                    extra={<img width={272} alt="logo" src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png" />}
                   >
                     <List.Item.Meta
-                      //avatar={<Avatar src={item.avatar} />}
+                      //avatar={<Avatar src={item.a} />}
+                      //description = {'lost'}
                       title={
-                        <a href={String('/article/' + item.arthash)}>
-                          {item.title}
-                        </a>
+                        <Link to={{pathname : String('/article/de' + item.id) , state:{idata:item},}}>
+                          {(new Buffer(item.title,'base64')).toString()}
+                        </Link>
                       }
-                      description={item.abstract}
                     />
-                    {item.content}
+                    <span style = {{whiteSpace : 'normal' , wordBreak : 'break-all'}}>
+                      {(new Buffer(item.abstract,'base64')).toString()}
+                    </span>
                   </List.Item>
                 )}
               />
@@ -101,6 +164,9 @@ class Article extends React.Component {
           );
         })}
       </Collapse>
+      </div>
+      }
+      </div>
     );
   }
 }

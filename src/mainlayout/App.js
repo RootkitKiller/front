@@ -3,6 +3,7 @@ import { Layout, Menu, Button, Alert, Row, Col} from 'antd';
 
 import Home from '../components/Home';
 import Article from '../components/Article';
+import Details from '../components/Details';
 import Wallet from '../components/Wallet';
 import Ipfstest from '../components/Ipfstest';
 import ControlledEditor from '../components/Editer';
@@ -149,14 +150,15 @@ class App extends Component {
               style={{ margin: '8px 0' }}
               showIcon />
               :null}*/}
-            <div style={{ background: '#fff', padding: 24, minHeight: 380 }}>
+            <div style={{ background: '#fff', padding: 24, minHeight: 800 }}>
             {/*
             <Button onClick = {this.handleAuth}>Auth</Button>
             <Button onClick = {this.handleGetBanlance}>getBanlance</Button>
             <Button onClick = {this.sendMoney}>sendMoney</Button>*/}
 
               <Route exact path="/home" component={Home} />
-              <Route path="/article" component={Article} />
+              <Route exact path="/article" component={Article} />
+              <Route path="/article/:arthash" component={Details} />
               <Route path="/wallet" component={Wallet} />
               <Route path="/ipfstest" component={Ipfstest} />
               <Route path="/editer" component={ControlledEditor} />
