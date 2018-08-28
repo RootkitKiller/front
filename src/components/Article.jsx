@@ -2,13 +2,11 @@ import React ,  {Component} from 'react';
 
 import {Link} from "react-router-dom";
 
-import ReactDOM from 'react-dom';
-
 import { Collapse } from 'antd';
 
-import { List, Avatar, Button, Spin, Icon } from 'antd';
+import { List, Spin, Icon } from 'antd';
 
-import { getTableRows } from '../request/request.js';
+import { getTableRows , timeString} from '../request/request.js';
 
 //const fakeDataUrl = 'https://randomuser.me/api/?results=5&inc=name,gender,email,nat&noinfo';
 
@@ -93,7 +91,8 @@ class Article extends React.Component {
   }
   componentDidMount() {
     // 数据异步请求，请求成功之后setState
-    getTableRows({json:true,code:'wafyartvotes',scope:'wafyartvotes',table:'cates'}).then(data => {
+    if(listCates.length === 0){
+      getTableRows({json:true,code:'wafyartvotes',scope:'wafyartvotes',table:'cates'}).then(data => {
   	      try{
                 listCates = data.rows;
                 for (let i = 0; i < listCates.length; i++) {
@@ -110,6 +109,11 @@ class Article extends React.Component {
 		          }catch(e){
 		  	        console.log(e);
 		          }});
+    }else{
+        this.setState({
+          loading: false
+        })      
+    }
 
   }
   render() {
@@ -138,10 +142,10 @@ class Article extends React.Component {
                   <List.Item
                     key={item.id}
                     actions={[
+                      <IconText type="user" text={item.author} />,
                       <span><Show id={String("zan" + item.id)}   />{item.votenum} </span>,
                       <IconText type="pay-circle" text={item.basetick} />,
-                      <IconText type="user" text={item.author} />,
-                      <IconText type="usr"  text={new Date(item.timestamp * 1000).toLocaleDateString()}/>
+                      <IconText type="usr"  text={timeString(item.timestamp)}/>
                     ]}
                     extra={<img width={272} alt="logo" src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png" />}
                   >

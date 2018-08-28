@@ -153,3 +153,10 @@ export function getAction(object){
         xhr.send(data);
     });
 }
+
+
+export function timeString(timestamp){
+    var newDate = new Date(parseInt(timestamp) * 1000);
+    //return newDate.toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
+    return newDate.toISOString().substr(0,10) + ' ' + newDate.toTimeString().substr(0,8);
+}
