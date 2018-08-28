@@ -5,14 +5,16 @@ import Home from '../components/Home';
 import Article from '../components/Article';
 import Details from '../components/Details';
 import Wallet from '../components/Wallet';
-import Ipfstest from '../components/Ipfstest';
+//import Ipfstest from '../components/Ipfstest';
 import ControlledEditor from '../components/Editer';
+import Sr from '../components/Sr';
 
 import { auth, getBanlance, signfun } from '../request/request.js';
 
 import {
   BrowserRouter as Router,
   Route,
+  HashRouter,
   Link,
 } from "react-router-dom";
 
@@ -102,7 +104,7 @@ class App extends Component {
   }
   render(){
     return (
-      <Router>
+      <HashRouter>
         <Layout>
           <Header style={{ position: 'fixed', zIndex: 1, width: '100%'  }}>
           <Row>
@@ -116,12 +118,11 @@ class App extends Component {
               defaultSelectedKeys={['1']}
               style={{ lineHeight: '64px' }}
             >
-              <Menu.Item key="1"><Link to='/home'>主页</Link></Menu.Item>
-              <Menu.Item key="2"><Link to='/article'>文章</Link></Menu.Item>
-              <Menu.Item key="3"><Link to='/sr'>订阅</Link></Menu.Item>
-              <Menu.Item key="4"><Link to='/wallet'>钱包</Link></Menu.Item>
-              <Menu.Item key="5"><Link to='/ipfstest'>ipfsapi测试</Link></Menu.Item>
-              <Menu.Item key="6"><Link to='/editer'>发布</Link></Menu.Item>
+              <Menu.Item key="1"><Link to='/'>主页</Link></Menu.Item>
+              <Menu.Item key="2"><Link to='/article' replace>文章</Link></Menu.Item>
+              <Menu.Item key="3"><Link to={{pathname : '/sr',data:scatter}} replace>订阅</Link></Menu.Item>
+              <Menu.Item key="4"><Link to={{pathname : '/wallet',data:scatter}} replace>钱包</Link></Menu.Item>
+              <Menu.Item key="5"><Link to='/editer' replace>发布</Link></Menu.Item>
             </Menu>
             </Col>
             <Col span={2}>
@@ -160,15 +161,16 @@ class App extends Component {
               <Route exact path="/article" component={Article} />
               <Route path="/article/:arthash" component={Details} />
               <Route path="/wallet" component={Wallet} />
-              <Route path="/ipfstest" component={Ipfstest} />
+              {/*<Route path="/ipfstest" component={Ipfstest} />*/}
               <Route path="/editer" component={ControlledEditor} />
+              <Route path="/sr" component={Sr} />
             </div>
           </Content>
           <Footer style={{ textAlign: 'center' }}>
             Ant Design ©2018 Created by Ant UED
           </Footer>
         </Layout>
-      </Router>
+      </HashRouter>
       );
   }
 }

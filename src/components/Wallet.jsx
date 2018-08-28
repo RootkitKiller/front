@@ -33,9 +33,16 @@ class Wallet extends Component {
     	this.handleMzUnstaNumChange=this.handleMzUnstaNumChange.bind(this);
     }   	
     componentDidMount(){
-	   	document.addEventListener('scatterLoaded', scatterExtension => {
-	   		this.handleGetInfo();
-	    });	
+    	if(this.props.location.data!==undefined){
+    		//console.log('aaa');
+    		this.handleGetInfo(this.props.location.data);
+	    }else{
+		   	document.addEventListener('scatterLoaded', scatterExtension => {
+		   		//console.log(window.scatter)
+		   		this.handleGetInfo(window.scatter);
+		    });	
+	    }
+
   	}
   	convertUTCTimeToLocalTime(utc_datetime) {
 	    var T_pos = utc_datetime.indexOf('T');
@@ -45,25 +52,27 @@ class Wallet extends Component {
 	    var new_datetime = year_month_day+" "+hour_minute_second; // 2017-03-31 08:02:06
 
 	    // 处理成为时间戳
-	    timestamp = new Date(Date.parse(new_datetime));
+	    var timestamp = new Date(Date.parse(new_datetime));
 	    timestamp = timestamp.getTime();
 	    timestamp = timestamp/1000;
 
 	    // 增加8个小时，北京时间比utc时间多八个时区
-	    var timestamp = timestamp+8*60*60;
+	    timestamp = timestamp+8*60*60;
 
 	    // 时间戳转为时间
-	    var beijing_datetime = new Date(parseInt(timestamp) * 1000).toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
+	    var beijing_datetime = new Date(parseInt(timestamp,10) * 1000).toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
 	    return beijing_datetime; // 2017-03-31 16:02:06
     }
-  	handleGetInfo(){
+  	handleGetInfo(scatter){
   		try{
-	    	const scatter = window.scatter;
-	    	if(scatter!==null && scatter.identity !==null && scatter.identity.accounts!==null){
+	    	//const scatter = window.scatter;
+	    	//console.log(scatter)
+	    	var tempname=scatter.identity.accounts[0].name
+	    	if(scatter!==null && scatter.identity !==null && scatter.identity.accounts!==null && scatter.identity.accounts[0].name !==null){
 	      		this.setState({name:scatter.identity.accounts[0].name});
-	      		this.handleGetBanlance();
-	      		this.handleGetAction();
-	      		this.handleGetUnstake();
+	      		this.handleGetBanlance(tempname);
+	      		this.handleGetAction(tempname);
+	      		this.handleGetUnstake(tempname);
 	      	}	
 	  	}catch(e){
 	  		console.log(e);
@@ -79,8 +88,8 @@ class Wallet extends Component {
 	        console.log("获取身份失败");
 	    });
   	}
-  	handleGetUnstake(){
-  		getTableRows({json:true,code:'wafyartvotes',scope:this.state.name,table:'accunstakes'}).then(result => {
+  	handleGetUnstake(tempname){
+  		getTableRows({json:true,code:'wafyartvotes',scope:tempname,table:'accunstakes'}).then(result => {
 	      //console.log(result);
 	      try{
 	      	//console.log(result);
@@ -92,8 +101,8 @@ class Wallet extends Component {
 		  }
 	    });
   	}
-  	handleGetBanlance(){
-	    getTableRows({json:true,code:'wafyarttoken',scope:this.state.name,table:'accounts'}).then(result => {
+  	handleGetBanlance(tempname){
+	    getTableRows({json:true,code:'wafyarttoken',scope:tempname,table:'accounts'}).then(result => {
 	      //console.log(result);
 	      try{
 		    this.setState({
@@ -103,7 +112,7 @@ class Wallet extends Component {
 		  	console.log(e);
 		  }
 	    });
-	    getTableRows({json:true,code:'eosio.token',scope:this.state.name,table:'accounts'}).then(result => {
+	    getTableRows({json:true,code:'eosio.token',scope:tempname,table:'accounts'}).then(result => {
 	      //console.log(result);
 	      try{
 		    this.setState({
@@ -118,7 +127,7 @@ class Wallet extends Component {
 	    	code:'wafyartvotes',
 	    	scope:'wafyartvotes',
 	    	table:'acctickets',
-	    	lower_bound:this.state.name
+	    	lower_bound:tempname
 	    }
 	    getTableRows(obj).then(res=>{
 	    	//console.log('aaaa'+res);
@@ -134,8 +143,8 @@ class Wallet extends Component {
 	    	}
 	    });
   	}
-  	handleGetAction(){
-  		getAction({pos:-1,offset:-20,account_name:this.state.name}).then(result => {
+  	handleGetAction(tempname){
+  		getAction({pos:-1,offset:-20,account_name:tempname}).then(result => {
 	      //console.log(result);
 	      try{
 	      	let res=Array.from(new Set((result.actions).reverse()));
@@ -210,7 +219,7 @@ class Wallet extends Component {
 	}
 	handleunstaOk = (e) => {
 	    console.log(e);
-	    signfun('wafyartvotes','unstaketit','self',parseInt(this.state.mzunstanum*10000.0000));
+	    signfun('wafyartvotes','unstaketit','self',parseInt(this.state.mzunstanum*10000.0000,10));
 	    this.setState({
 	      mzunstaable: false,
 	    });
@@ -226,7 +235,7 @@ class Wallet extends Component {
     	this.setState({mzunstanum:event.target.value});
   	}
   	timeToDate(timestamp){
-  		return new Date(parseInt(timestamp) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ');  
+  		return new Date(parseInt(timestamp,10) * 1000).toLocaleString().replace(/:\d{1,2}$/,' ');  
   	}
   	clickUnstake(ev,id){
   		//撤销解锁
