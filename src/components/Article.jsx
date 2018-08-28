@@ -99,6 +99,7 @@ class Article extends React.Component {
                   getTableRows({json:true, code:'wafyartvotes', scope:listCates[i].catename ,table:'articles'}).then(data => {
   	                try{
                       listArticles[i] = data.rows;
+		  	              //console.log(data.rows);
                       this.setState({
                         loading: false
                       })
@@ -123,7 +124,7 @@ class Article extends React.Component {
           this.state.loading
           ? <Spin indicator={antIcon} />
       :<div><Collapse bordered={false} defaultActiveKey={['1']} accordion>
-        {listCates.map(iter => {
+        {listCates.map((iter,key) => {
           i = i + 1;
           return (
             <Panel header={iter.catename} key={i} style={customPanelStyle}>
@@ -153,7 +154,7 @@ class Article extends React.Component {
                       //avatar={<Avatar src={item.a} />}
                       //description = {'lost'}
                       title={
-                        <Link to={{pathname : String('/article/de' + item.id) , state:{idata:item},}}>
+                        <Link to={{pathname : String('/article/de' + item.id) , state:{idata:item , catename : listCates[key].catename}}}>
                           {(new Buffer(item.title,'base64')).toString()}
                         </Link>
                       }

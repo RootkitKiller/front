@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 
+import {Link} from "react-router-dom";
+
 import { EditorState, convertToRaw } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 import draftToHtml from 'draftjs-to-html';
 
-import { Spin, Icon , List, Avatar, Divider , Row , Col , Button} from 'antd';
+import { Spin, Icon , List, Avatar, Divider , Row , Col , Button , Popover , Input} from 'antd';
 
 import { get } from '../tools/ipfsapi';
-import { getTableRows , timeString} from '../request/request.js';
+import { getTableRows , timeString , signfun} from '../request/request.js';
 
 
 //const { Header, Content, Footer } = Layout;
@@ -18,6 +20,8 @@ import { getTableRows , timeString} from '../request/request.js';
   var action = [];
   var author = '';
   var reply = [];
+  var caname = '';
+  var parid = -1;
   const antIcon = <Icon type="loading" style={{ 
     fontSize: 50 ,
     textAlign : 'center' ,    
@@ -44,6 +48,81 @@ const IconText = ({ type, text }) => (
   </span>
 );
 
+
+
+class Show extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      bool: false,
+    }
+  }
+  handleMessage = (event) =>{
+    parid = parseInt(event.target.id.slice(1));
+    console.log(parid);
+  }
+  handleDelete = (event) =>{
+    var id = event.target.id.split(':');
+    console.log(id);
+    signfun('wafyartvotes','deletecom','self',parseInt(id[0]),caname,parseInt(id[1]));  
+  }
+  handleLike = (event) =>{
+    this.setState({
+      bool: true
+    })  
+    event.target.style= {color: '#f50'}
+  }
+  handleClick = (value) =>{
+    if(!(parid < 0)){
+      signfun('wafyartvotes','createcom','self',(Buffer.from(value)).toString('base64'),caname,parid,2);
+      console.log(value);
+    }
+    parid = -1;
+    console.log(value);
+  }
+
+  getpa =(id) =>{
+    for(let i = 0; i < reply.length ; i++){
+      if(reply[i].id === id){
+        return (new Buffer(reply[i].comcontent,'base64')).toString();
+      }
+    }
+  }
+  render(){
+    return(   
+          <List
+              itemLayout="vertical"
+              dataSource={reply}
+              size="large"
+              renderItem={item => (
+                <div>
+                <Divider />
+                <List.Item actions={[timeString(item.timestamp) , 
+                                     <i className="anticon anticon-like" onClick={this.handleLike} id={`L${item.id}`} style = {(item.isbest)? {color: '#f50'} : null }/>,
+                                     //<PopInput onMouseOver={this.handleMessage} id={`M${item.id}`}/>,
+                                     <Popover placement="top" content={ (item.indexnum === 2) ?'不可评论':<Input.Search enterButton="提交" size="large"  onSearch={value =>this.handleClick(value)} />} 
+                                              trigger="click">
+                                        <i className="anticon anticon-message" onClick={this.handleMessage} id={`M${item.id}`}/> 
+                                     </Popover>,
+                                     <i className="anticon anticon-delete" onClick={this.handleDelete}  id={`${item.id}:${item.indexnum}`}/>,  
+                                     <Link to="/Wallet">{item.author}</Link>
+                                     ]}>
+                  <List.Item.Meta description={(item.indexnum === 2) ? this.getpa(item.parid) : null}                
+                  />
+                  <span style = {{whiteSpace : 'normal' , wordBreak : 'break-all'}}
+                    dangerouslySetInnerHTML={{__html: (new Buffer(item.comcontent,'base64')).toString()}}
+                  />
+                </List.Item>
+                </div>
+              )}
+            />
+    );
+  }
+}
+
+
+
+
 class Details extends Component {
     constructor(props){
     super(props);
@@ -60,7 +139,6 @@ class Details extends Component {
   }
 
   handleEdtor = (event) =>{
-
     this.setState({
       editorState: EditorState.createEmpty(),
       edtor: true
@@ -115,14 +193,14 @@ class Details extends Component {
     const htmbuf=Buffer.from(htmlCon);
     const htmBase=htmbuf.toString('base64');
 
-    var obj ={
-      title : '好心人',
-      avatar : 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
-      timestamp : Date.parse(new Date()) / 1000,
-      text : htmBase
-    }
+    // var obj ={
+    //   title : '好心人',
+    //   avatar : 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
+    //   timestamp : Date.parse(new Date()) / 1000,
+    //   text : htmBase
+    // }
 
-    reply.push(obj);
+    // reply.push(obj);
     this.setState({ replyd: true });
     this.setState({ edtor: false });
 
@@ -136,13 +214,23 @@ class Details extends Component {
     // const buffer=Buffer.from(htmBase);
     // add(buffer).then(hash=>{
     //   console.log(hash);
-    //   //上传文章到区块链
-    //   signfun('wafyartvotes','createart','self',titBase,absBase,hash,'devtest',(this.state.inputValue)*10000);
+      //上传文章到区块链
+         signfun('wafyartvotes','createcom','self',htmBase,caname,action[3],1);
     //   this.setState({ loading: false });
     //   alert('success');
     // }).catch(err=>{
     //   console.log(err);
     // });
+      getTableRows({json:true,code:'wafyartvotes',scope: caname,table:'comments'}).then(data => {
+  	      try{
+                reply = data.rows;
+                this.setState({
+                  loading: false,
+                  replyd : true
+                })    
+		          }catch(e){
+		  	        console.log(e);
+		        }});
   }
 
 
@@ -150,9 +238,8 @@ class Details extends Component {
   componentDidMount() {
     // 数据异步请求，请求成功之后setState
     var data = this.props.location.state;
-    var {idata} = data;
-    //console.log(idata);
-    //idata = itdata
+    var {idata , catename} = data;
+    caname = catename;
     get(idata.arthash)
       .then(data => {
         details = (new Buffer(data.toString() , 'base64')).toString();
@@ -163,13 +250,20 @@ class Details extends Component {
         action.push(idata.timestamp);
         action.push(idata.id);
         author = idata.author;
-        this.setState({
-          loading: false
-        })
       })
       .catch(err => {
         console.log(err);
       });
+      getTableRows({json:true,code:'wafyartvotes',scope: caname,table:'comments'}).then(data => {
+  	      try{
+                reply = data.rows;
+                this.setState({
+                  loading: false,
+                  replyd : true
+                })    
+		          }catch(e){
+		  	        console.log(e);
+		        }});
 
   }
   render() {
@@ -208,11 +302,11 @@ class Details extends Component {
           editorStyle={this.editstyle}
           onEditorStateChange={this.onEditorStateChange}
           toolbar ={{
-            options:['inline', 'blockType', 'fontSize', 'fontFamily', 'list', 'textAlign', 'colorPicker', 'image'],
+            options:['inline', 'blockType', 'fontSize', 'fontFamily', 'list', 'textAlign', 'colorPicker'],
             list: { inDropdown: true },
             textAlign: { inDropdown: true },
             link: { inDropdown: true },
-            image:{
+            /*image:{
               urlEnabled:false,
               uploadEnabled:true,
               alignmentEnabled:false,
@@ -221,7 +315,7 @@ class Details extends Component {
               inputAccept:'image/gif,image/jpeg,image/jpg,image/png,image/svg',
               alt:{present:false,mandatory:false},
               defaultSize:{height:'200'},
-            }
+            }*/
           }
           }
         /> 
@@ -230,30 +324,10 @@ class Details extends Component {
         </Button>
         </div>: <hr />}
               
-        <h3>当前线索</h3>
-        
-          {this.state.replyd ?   
-            <List
-              itemLayout="vertical"
-              dataSource={reply}
-              size="large"
-              renderItem={item => (
-                <div><Divider />
-                <Row>
-                  <Col span={2} ><p><Avatar src={item.avatar} /></p><p><a href="/Wallet">{item.title}</a> </p></Col>
-                  <Col span={20} >
-                <List.Item actions={[timeString(item.timestamp)]}>
-                  <List.Item.Meta />
-                  <span style = {{whiteSpace : 'normal' , wordBreak : 'break-all'}}
-                    dangerouslySetInnerHTML={{__html: (new Buffer(item.text,'base64')).toString()}}
-                  />
-                </List.Item>
-                </Col></Row></div>
-              )}
-            />
-              :null}
+        <h3>当前线索</h3>        
+          {this.state.replyd ?  <Show /> : null}
 
-          </div>
+         </div>
         }
 
       </div>

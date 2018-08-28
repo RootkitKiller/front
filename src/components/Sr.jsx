@@ -58,7 +58,9 @@ class Sr extends React.Component {
     }else{
 	    document.addEventListener('scatterLoaded', scatterExtension => {
 			   		//console.log(window.scatter)
-			   		this.setname(window.scatter.identity.accounts[0].name);
+						 var scatter = window.scatter;
+						if(scatter!=null && scatter.identity != null && scatter.identity.accounts != null && scatter.identity.accounts[0].name != null){
+			   		this.setname(window.scatter.identity.accounts[0].name);}
 			    });	
 	}
 
