@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Input, Modal, Row, Col, List, Button } from 'antd';
+import { Input, Modal, Row, Col, List, Button ,Drawer,Divider} from 'antd';
 import { auth, getTableRows, getAction, signfun } from '../request/request.js';
 const { TextArea } = Input;
 
@@ -153,16 +153,19 @@ class Wallet extends Component {
       scope: 'wafyartvotes',
       table: 'acctickets',
       lower_bound: tempname,
+      limit:1
     };
     getTableRows(obj).then(res => {
       //console.log('aaaa'+res);
       try {
         //console.log('sss'+res);
-        this.setState({
-          mzpbalance: res.rows[0].idletick / 10000.0 + ' MZP',
-          votemzp: res.rows[0].votetick / 10000.0 + ' MZP',
-          unstakemzp: res.rows[0].unstaketick / 10000.0 + ' MZP',
-        });
+        if(res.rows[0].byname === tempname){
+	        this.setState({
+	          mzpbalance: res.rows[0].idletick / 10000.0 + ' MZP',
+	          votemzp: res.rows[0].votetick / 10000.0 + ' MZP',
+	          unstakemzp: res.rows[0].unstaketick / 10000.0 + ' MZP',
+	        });
+	    }
       } catch (e) {
         console.log('mzp error:' + e);
       }
@@ -285,6 +288,21 @@ class Wallet extends Component {
     //}
     this.setState({ unstakelist: temp });
   }
+  showDrawer = (ev,trx) => {
+		//console.log(trx);
+		trx=JSON.stringify(trx,null,2);
+		//console.log(trx);
+	    this.setState({
+	      visible: true,
+	      curtrx:trx
+	    });
+  };
+  onClose = () => {
+    this.setState({
+      visible: false,
+    });
+  };
+
   render() {
     const data = [
       {
@@ -420,7 +438,7 @@ class Wallet extends Component {
             bordered
             dataSource={this.state.actiondata}
             renderItem={item => (
-              <List.Item>
+              <List.Item actions={[<a onClick={(ev)=>{this.showDrawer(ev,item)}}>查看更多</a>]}>
                 <List.Item.Meta
                   title={
                     <p>
@@ -441,6 +459,17 @@ class Wallet extends Component {
             )}
           />
           <br />
+          <Drawer
+          	width={'25%'}
+          	placement="right"
+          	closable={false}
+          	onClose={this.onClose}
+          	visible={this.state.visible}>	          
+	          <p >详细记录</p>	          
+	          <Divider />
+	          <pre >{this.state.curtrx}</pre>
+			          
+		   </Drawer>
         </Col>
         <Col span={1} />
         <Col span={5}>

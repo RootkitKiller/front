@@ -5,11 +5,23 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import draftToHtml from 'draftjs-to-html';
 //import htmlToDraft from 'html-to-draftjs';
 import { add } from '../tools/ipfsapi';
-import { Input, Select, Button, Slider, InputNumber, Row, Col } from 'antd';
+import { Input, Select, Button, Slider, InputNumber, Row, Col ,Upload, Icon, message} from 'antd';
 import { signfun } from '../request/request.js';
 
 const { TextArea } = Input;
 const Option = Select.Option;
+
+function beforeUpload(file) {
+  const isJPG = file.type === 'image/jpeg';
+  if (!isJPG) {
+    message.error('只能上传图片!');
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error('图片必须小于 2MB!');
+  }
+  return isJPG && isLt2M;
+}
 
 class ControlledEditor extends Component {
   constructor(props) {
@@ -21,6 +33,9 @@ class ControlledEditor extends Component {
       abstContent: '',
       styleContent: 'other',
       inputValue: 10,
+      picloading: false,
+      curpic:'',
+      imageUrl:''
     };
     this.editstyle = {
       height: '300px',
@@ -111,7 +126,7 @@ class ControlledEditor extends Component {
           this.state.inputValue * 10000
         );
         this.setState({ loading: false });
-        alert('success');
+        //alert('success');
       })
       .catch(err => {
         console.log(err);
@@ -121,20 +136,74 @@ class ControlledEditor extends Component {
   handleSelectChange(value) {
     this.setState({ styleContent: value });
   }
+  handleChange = (info) => {
+    if (info.file.status === 'uploading') {
+      this.setState({ picloading: true });
+      return;
+    }
+  }
   render() {
     const { editorState } = this.state;
     const { inputValue } = this.state;
+    const uploadButton = (
+      <div>
+        <Icon type={this.state.picloading ? 'loading' : 'plus'} />
+        <div className="ant-upload-text">上传照片</div>
+      </div>
+    );
+    const imageUrl = this.state.imageUrl;
+
     return (
       <div>
         <h3>标题（不超过30字）</h3>
         <TextArea value={this.state.titleContent} onChange={this.handleTitChange} autosize />
         <div style={{ margin: '15px 0' }} />
-        <h3>摘要（不超过180字）</h3>
-        <TextArea
-          value={this.state.abstContent}
-          onChange={this.handleAbsChange}
-          autosize={{ minRows: 1, maxRows: 6 }}
-        />
+        <Row><Col span={20}>
+        <h3>简介与照片（将会显示在首页，其中简介不超过150字）</h3>
+        <TextArea value={this.state.abstContent} onChange={this.handleAbsChange} autosize={{ minRows: 3, maxRows: 6 }} />
+        </Col><Col span={1}></Col><Col span={3}>
+
+        <Upload
+          name="avatar"
+          listType="picture-card"
+          className="avatar-uploader"
+          accept='image/gif,image/jpeg,image/jpg,image/png,image/svg'
+          showUploadList={false}
+          onChange={this.handleChange}
+          action={ (file)=>{
+             new Promise((resolve,reject)=>{
+              const xhr = new XMLHttpRequest();
+              xhr.open("POST","http://119.28.52.50:5001/api/v0/add",true);
+              const data=new FormData();
+              data.append('file',file);
+              xhr.send(data);
+              xhr.addEventListener('load',()=>{
+                const response =JSON.parse(xhr.responseText);
+                let formdata={
+                  data:{
+                    link:"http://119.28.52.50:8080/ipfs/"+response.Hash
+                  }
+                }
+                this.setState({
+                  imageUrl:formdata.data.link,
+                  picloading: false,
+                  curpic:response.Hash
+                });
+                console.log(response);
+                resolve(formdata.data.link)
+                //return '/#/editer';
+              });
+              xhr.addEventListener('error',()=>{
+                const error=JSON.parse(xhr.responseText);
+                reject(error);
+              });
+          });
+        }}        
+          beforeUpload={beforeUpload}
+        >
+          {imageUrl ? <img src={imageUrl} width='90px' height='90px' alt="avatar" /> : uploadButton}
+        </Upload>
+        </Col></Row>
         <div style={{ margin: '15px 0' }} />
         <h3>正文</h3>
         <Editor
