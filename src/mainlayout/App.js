@@ -62,32 +62,27 @@ class App extends Component {
     });
   }
   handleAuth() {
-    this.state.scatterState !== 2 ? (
-      <Alert
-        message="警告"
-        description="未发现scatter插件，请安装."
-        type="error"
-        closable
-        style={{ margin: '8px 0' }}
-        showIcon
-      />
-    ) : null;
-    auth()
-      .then(identity => {
-        // This would give back an object with the required fields such as `firstname` and `lastname`
-        // as well as add a permission for your domain or origin to the user's Scatter to allow deeper
-        // requests such as requesting blockchain signatures, or authentication of identities.
-        console.log(identity);
-        this.setState({
-          isLogin: true,
-          identity: identity,
-          name: identity.accounts[0].name,
+
+    if(this.state.scatterState !==2){
+      alert('scatter插件未安装，请先安装插件');
+    }else{
+      auth()
+        .then(identity => {
+          // This would give back an object with the required fields such as `firstname` and `lastname`
+          // as well as add a permission for your domain or origin to the user's Scatter to allow deeper
+          // requests such as requesting blockchain signatures, or authentication of identities.
+          console.log(identity);
+          this.setState({
+            isLogin: true,
+            identity: identity,
+            name: identity.accounts[0].name,
+          });
+        })
+        .catch(error => {
+          //...
+          console.log('获取身份失败');
         });
-      })
-      .catch(error => {
-        //...
-        console.log('获取身份失败');
-      });
+    }
   }
   handleGetBanlance() {
     const that = this;

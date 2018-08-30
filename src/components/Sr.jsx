@@ -58,7 +58,10 @@ class Sr extends React.Component {
   componentDidMount() {
     // 数据异步请求，请求成功之后setState
     this.getAudlist();
-    if (this.props.location.data !== undefined) {
+    if (this.props.location.data !== undefined && this.props.location.data !== null &&
+    	this.props.location.data.identity != null &&
+    	this.props.location.data.identity.accounts !=null &&
+    	this.props.location.data.identity.accounts[0].name !=null) {
       //console.log('aaaa');
       this.setname(this.props.location.data.identity.accounts[0].name);
     } else {
