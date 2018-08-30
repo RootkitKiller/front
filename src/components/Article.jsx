@@ -93,11 +93,11 @@ class Article extends React.Component {
   componentDidMount() {
     // 数据异步请求，请求成功之后setState
     if(listCates.length === 0){
-      getTableRows({json:true,code:'wafyartvotes',scope:'wafyartvotes',table:'cates'}).then(data => {
+      getTableRows({json:true,code:'code',scope:'code',table:'cates'}).then(data => {
   	      try{
                 listCates = data.rows;
                 for (let i = 0; i < listCates.length; i++) {
-                  getTableRows({json:true, code:'wafyartvotes', scope:listCates[i].catename ,table:'articles'}).then(data => {
+                  getTableRows({json:true, code:'code', scope:listCates[i].catename ,table:'articles'}).then(data => {
   	                try{
                       listArticles[i] = data.rows;
 		  	              //console.log(data.rows);
@@ -150,9 +150,10 @@ class Article extends React.Component {
                       <IconText type="pay-circle" text={item.basetick / 10000.0000} />,
                       <IconText type="usr"  text={timeString(item.timestamp)}/>
                     ]}
-                    extra={<img width={272} alt="logo" src={/*/
+                    extra={<img width={252} height={180} alt="logo" src={/*/
                       item.abstract /*/
-                      "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"//*/
+                      /*"https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"//*/
+                      'http://119.28.52.50:8080/ipfs/'+item.pichash
                     } />}
                   >
                     <List.Item.Meta

@@ -110,11 +110,19 @@ export function signfun(contractname, contractfun, byname, ...arg) {
   };
   const eos = scatter.eos(network, Eos, eosOptions);
   let name = '';
+  let conname ='';
+  if(contractname ==='token'){
+    //代币合约账户
+    conname = 'wafytoken123';
+  }else if(contractname === 'code'){
+    //代码逻辑账户
+    conname='wafycode1234';
+  }
   if (byname === 'self') {
     name = scatter.identity.accounts[0].name;
   }
   return eos
-    .contract(contractname)
+    .contract(conname)
     .then(contract => {
       eval('contract.' + contractfun)(name, ...arg, {
         authorization: [
@@ -128,13 +136,16 @@ export function signfun(contractname, contractfun, byname, ...arg) {
       })
         .then(trx => {
           console.log(trx);
+          alert('交易id：'+trx.transaction_id);
         })
         .catch(e => {
           console.log('error', e);
+          alert(e);
         });
     })
     .catch(e => {
       console.log('error', e);
+      alert(e);
     });
 }
 
@@ -144,6 +155,20 @@ export function getRows(json, code, scope, table) {
 }
 export function getTableRows(object) {
   return new Promise(function(resolve, reject) {
+    if(object.code==='token'){
+      object.code='wafytoken123';
+    }else if(object.code==='code'){
+      object.code='wafycode1234';
+    }
+    //else{
+      //alert(object.code+'code字段取值错误：取值为"token"表示token合约，取值"code"表示业务合约');
+    //}
+    if(object.scope==='token'){
+      object.scope='wafytoken123';
+    }else if(object.scope==='code'){
+      object.scope='wafycode1234';
+    }
+
     var data = JSON.stringify(object);
     var xhr = new XMLHttpRequest();
 
@@ -151,10 +176,12 @@ export function getTableRows(object) {
     xhr.onload = function() {
       if (xhr.status === 200) {
         resolve(JSON.parse(xhr.responseText));
+        //alert(JSON.parse(xhr.responseText));
       } 
     };
     xhr.onerror = function() {
       reject(new Error(xhr.statusText));
+      //alert(new Error(xhr.statusText));
     };
     xhr.send(data);
   });

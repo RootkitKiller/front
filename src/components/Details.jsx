@@ -49,7 +49,7 @@ class Show extends Component {
   }
   handleDelete = (event) =>{
     var id = event.target.id.split(':');
-    signfun('wafyartvotes','deletecom','self',parseInt(id[0]),caname,parseInt(id[1])); 
+    signfun('code','deletecom','self',parseInt(id[0]),caname,parseInt(id[1])); 
   }
   handleLike = (event) =>{
     this.setState({
@@ -59,7 +59,7 @@ class Show extends Component {
   }
   handleClick = (value) =>{
     if(!(this.state.parid < 0)){
-      signfun('wafyartvotes','createcom','self',(Buffer.from(value)).toString('base64'),caname,this.state.parid,2);
+      signfun('code','createcom','self',(Buffer.from(value)).toString('base64'),caname,this.state.parid,2);
     }
     this.setState({
       parid : -1,
@@ -131,21 +131,21 @@ class Details extends Component {
   enterLoading = () => {
     this.setState({ replyd: false });  
     const htmBase=(Buffer.from(this.state.Comment)).toString('base64');
-    signfun('wafyartvotes','createcom','self',htmBase,caname,action.id,1);
+    signfun('code','createcom','self',htmBase,caname,action.id,1);
     this.setState({ edtor: false });  
     this.getFirstComm();
   }
  getFirstComm () {
     this.setState({ replyd: false });
     replyFis = [];
-      getTableRows({json:true,code:'wafyartvotes',scope: caname,table:'comments',key_type:'i64',index_position:'2',lower_bound:action.id,upper_bound:action.id + 1}).then(data => {
+      getTableRows({json:true,code:'code',scope: caname,table:'comments',key_type:'i64',index_position:'2',lower_bound:action.id,upper_bound:action.id + 1}).then(data => {
   	      try{
               replyFis = data.rows;
               let tmp = replyFis.length - 1;
               replySec = [];
               replylist = {};
               replyFis.map((iter,key) => {
-                getTableRows({json:true,code:'wafyartvotes',scope: caname,table:'comments',key_type:'i64',index_position:'2',lower_bound:iter.id,upper_bound:iter.id + 1}).then(data => {
+                getTableRows({json:true,code:'code',scope: caname,table:'comments',key_type:'i64',index_position:'2',lower_bound:iter.id,upper_bound:iter.id + 1}).then(data => {
   	              try{		       
                       replySec = replySec.concat(data.rows);
                       replylist[iter.id] = iter.comcontent;

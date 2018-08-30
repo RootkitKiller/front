@@ -79,8 +79,8 @@ class Sr extends React.Component {
   getAudlist() {
     getTableRows({
       json: true,
-      code: 'wafyartvotes',
-      scope: 'wafyartvotes',
+      code: 'code',
+      scope: 'code',
       table: 'cates',
     }).then(data => {
       var listaud = [];
@@ -92,7 +92,7 @@ class Sr extends React.Component {
         for (let i = 0; i < this.state.catelist.length; i++) {
           getTableRows({
             json: true,
-            code: 'wafyartvotes',
+            code: 'code',
             scope: this.state.catelist[i].catename,
             table: 'auditorlists',
             key_type: 'i64',
@@ -131,7 +131,7 @@ class Sr extends React.Component {
     //console.log(this.state.curauditor);
     //console.log(this.state.curcatename);
     signfun(
-      'wafyartvotes',
+      'code',
       'voteaud',
       'self',
       parseInt(this.state.votenum * 10000.0, 10),
@@ -176,7 +176,7 @@ class Sr extends React.Component {
       var num = parseInt(this.contains(catename, this.state.curname), 10) + 1;
       alert('错误：已经在审核员列表中了，排名在第' + num + '位');
     } else {
-      signfun('wafyartvotes', 'regauditor', 'self', catename);
+      signfun('code', 'regauditor', 'self', catename);
       this.getAudlist();
     }
   }
@@ -184,7 +184,7 @@ class Sr extends React.Component {
     if (this.contains(catename, this.state.curname) < 0) {
       alert('错误：您目前不是审核者，不用退出');
     } else {
-      signfun('wafyartvotes', 'delauditor', 'self', catename);
+      signfun('code', 'delauditor', 'self', catename);
       this.getAudlist();
     }
   }

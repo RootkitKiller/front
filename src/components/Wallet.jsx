@@ -101,7 +101,7 @@ class Wallet extends Component {
   handleGetUnstake(tempname) {
     getTableRows({
       json: true,
-      code: 'wafyartvotes',
+      code: 'code',
       scope: tempname,
       table: 'accunstakes',
     }).then(result => {
@@ -119,7 +119,7 @@ class Wallet extends Component {
   handleGetBanlance(tempname) {
     getTableRows({
       json: true,
-      code: 'wafyarttoken',
+      code: 'token',
       scope: tempname,
       table: 'accounts',
     }).then(result => {
@@ -149,8 +149,8 @@ class Wallet extends Component {
     });
     const obj = {
       json: true,
-      code: 'wafyartvotes',
-      scope: 'wafyartvotes',
+      code: 'code',
+      scope: 'code',
       table: 'acctickets',
       lower_bound: tempname,
       limit:1
@@ -195,7 +195,7 @@ class Wallet extends Component {
   handleOk = e => {
     console.log(e);
     signfun(
-      'wafyarttoken',
+      'token',
       'transfer',
       'self',
       this.state.mztransto,
@@ -231,7 +231,7 @@ class Wallet extends Component {
 
   handlestakeOk = e => {
     console.log(e);
-    signfun('wafyarttoken', 'staketoken', 'self', this.state.mzstakenum + ' MZ');
+    signfun('token', 'staketoken', 'self', this.state.mzstakenum + ' MZ');
     this.setState({
       mzstakeable: false,
     });
@@ -254,7 +254,7 @@ class Wallet extends Component {
   };
   handleunstaOk = e => {
     console.log(e);
-    signfun('wafyartvotes', 'unstaketit', 'self', parseInt(this.state.mzunstanum * 10000.0, 10));
+    signfun('code', 'unstaketit', 'self', parseInt(this.state.mzunstanum * 10000.0, 10));
     this.setState({
       mzunstaable: false,
     });
@@ -274,7 +274,7 @@ class Wallet extends Component {
   }
   clickUnstake(ev, id) {
     //撤销解锁
-    signfun('wafyartvotes', 'delunstake', 'self', id);
+    signfun('code', 'delunstake', 'self', id);
     //console.log(id);
     var temp = [];
     for (var i = 0; i < this.state.unstakelist.length; i++) {

@@ -109,28 +109,37 @@ class ControlledEditor extends Component {
     console.log(this.state.styleContent);
     console.log(this.state.inputValue);
 
-    //上传文章内容到ipfs网络
-    const buffer = Buffer.from(htmBase);
-    add(buffer)
-      .then(hash => {
-        console.log(hash);
-        //上传文章到区块链
-        signfun(
-          'wafyartvotes',
-          'createart',
-          'self',
-          titBase,
-          absBase,
-          hash,
-          'devtest',
-          this.state.inputValue * 10000
-        );
-        this.setState({ loading: false });
-        //alert('success');
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    if(titBase.length>79){
+      alert('标题太长了！！！');
+      this.setState({ loading: false });
+    }else if(absBase.length>399){
+      alert('摘要太长了！！！');
+      this.setState({ loading: false });
+    }else{
+      //上传文章内容到ipfs网络
+      const buffer = Buffer.from(htmBase);
+      add(buffer)
+        .then(hash => {
+          console.log(hash);
+          //上传文章到区块链
+          signfun(
+            'code',
+            'createart',
+            'self',
+            titBase,
+            absBase,
+            this.state.curpic,
+            hash,
+            'devtest',
+            this.state.inputValue * 10000
+          );
+          this.setState({ loading: false });
+          //alert('success');
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   };
 
   handleSelectChange(value) {

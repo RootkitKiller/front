@@ -9,9 +9,9 @@ import Wallet from '../components/Wallet';
 import ControlledEditor from '../components/Editer';
 import Sr from '../components/Sr';
 
-import { auth, getBanlance, signfun } from '../request/request.js';
+import { auth, getBanlance, } from '../request/request.js';
 
-import { BrowserRouter as Router, Route, HashRouter, Link } from 'react-router-dom';
+import { Route, HashRouter, Link } from 'react-router-dom';
 
 /* 导航条右上角Dropdown 个人信息
 const menu = (
@@ -47,7 +47,7 @@ class App extends Component {
     };
     this.handleGetBanlance = this.handleGetBanlance.bind(this);
     this.handleAuth = this.handleAuth.bind(this);
-    this.sendMoney = this.sendMoney.bind(this);
+    //this.sendMoney = this.sendMoney.bind(this);
   }
   componentWillMount() {
     this.setState({
@@ -99,10 +99,7 @@ class App extends Component {
       });
     });
   }
-  sendMoney() {
-    //send('moon11112222','1.0000 MZ');
-    signfun('wafyarttoken', 'transfer', 'self', 'moon11112222', '1.0000 MZ', 'test test test');
-  }
+
   render() {
     return (
       <HashRouter>
